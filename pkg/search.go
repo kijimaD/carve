@@ -11,7 +11,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-func getVersion(repopath string) (string, error) {
+func getCurrentVersion(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
 	if err != nil {
 		log.Fatal(err)
@@ -23,6 +23,7 @@ func getVersion(repopath string) (string, error) {
 	}
 
 	var version string
+	// MEMO: 古い順にイテレートされ、ループの最後で最新のバージョンが入る
 	tagIter.ForEach(func(ref *plumbing.Reference) error {
 		version = ref.Name().Short()
 		return nil

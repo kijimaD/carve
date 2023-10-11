@@ -19,8 +19,6 @@ func TestVersion(t *testing.T) {
 	}
 
 	repoPath := "."
-	tagName := "v1.0.0"             // タグ名
-	tagMessage := "Initial release" // タグメッセージ
 
 	// 指定したディレクトリに新しいGitリポジトリを初期化
 	r, err := git.PlainInit(repoPath, false)
@@ -55,23 +53,48 @@ func TestVersion(t *testing.T) {
 	// 最新コミット
 	h, err := r.Head()
 	// タグを追加
-	_, err = r.CreateTag(tagName, h.Hash(), &git.CreateTagOptions{
+	_, err = r.CreateTag("v1.0.0", h.Hash(), &git.CreateTagOptions{
 		Tagger: &object.Signature{
 			Name:  "Your Name",
 			Email: "your.email@example.com",
 			When:  time.Now(),
 		},
-		Message: tagMessage,
+		Message: "tag message",
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	v, err := getVersion("./.git")
+	_, err = w.Commit("dummy commit2", &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  "Your Name",
+			Email: "your.email@example.com",
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	h, err = r.Head()
+	// タグを追加
+	_, err = r.CreateTag("v2.0.0", h.Hash(), &git.CreateTagOptions{
+		Tagger: &object.Signature{
+			Name:  "Your Name",
+			Email: "your.email@example.com",
+			When:  time.Now(),
+		},
+		Message: "tag message",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	v, err := getCurrentVersion("./.git")
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, "v1.0.0", v)
+	assert.Equal(t, "v2.0.0", v)
 
 	err = os.RemoveAll("./.git")
 	if err != nil {
