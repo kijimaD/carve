@@ -47,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: fetch tag
+        run: git fetch --tags
       - name: test
         run: make test
 
