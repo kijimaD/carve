@@ -1,12 +1,5 @@
 # carve
 
-Go template repository.
-
-```
-git grep -l 'carve' | xargs sed -i 's/carve/your_repo/g'
-git grep -l 'kijimaD' | xargs sed -i 's/kijimaD/your_name/g'
-```
-
 ## install
 
 ```
