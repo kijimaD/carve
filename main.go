@@ -1,10 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"os"
+
+	"github.com/kijimaD/carve/cmd"
 )
 
 func main() {
-	fmt.Fprintln(os.Stdout, "Hello world")
+	cmd := cmd.New(os.Stdout)
+	err := cmd.Execute(os.Args)
+	if err != nil {
+		panic(err)
+	}
 }

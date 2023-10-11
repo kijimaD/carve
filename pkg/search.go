@@ -11,7 +11,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-func getVersion(repopath string) (string, error) {
+func GetCurrentVersion(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
 	if err != nil {
 		log.Fatal(err)
@@ -23,6 +23,7 @@ func getVersion(repopath string) (string, error) {
 	}
 
 	var version string
+	// MEMO: 古い順にイテレートされ、ループの最後で最新のバージョンが入る
 	tagIter.ForEach(func(ref *plumbing.Reference) error {
 		version = ref.Name().Short()
 		return nil
@@ -30,16 +31,17 @@ func getVersion(repopath string) (string, error) {
 	return version, nil
 }
 
-func search(targetpath []string, old string, new string) error {
+func Replacewalk(targetpath []string, old string, new string) error {
 	rootDir := "."
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		// TODO: pathをループする
-		if !info.IsDir() && path == targetpath[0] {
-			if err := replacefile(path, old, new); err != nil {
-				return err
+		for _, tp := range targetpath {
+			if !info.IsDir() && path == tp {
+				if err := replacefile(path, old, new); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
