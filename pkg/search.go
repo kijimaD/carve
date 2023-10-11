@@ -11,7 +11,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-func getCurrentVersion(repopath string) (string, error) {
+func GetCurrentVersion(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
 	if err != nil {
 		log.Fatal(err)
@@ -31,7 +31,7 @@ func getCurrentVersion(repopath string) (string, error) {
 	return version, nil
 }
 
-func replacewalk(targetpath []string, old string, new string) error {
+func Replacewalk(targetpath []string, old string, new string) error {
 	rootDir := "."
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {

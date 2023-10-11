@@ -90,7 +90,7 @@ func TestVersion(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	v, err := getCurrentVersion("./.git")
+	v, err := GetCurrentVersion("./.git")
 	if err != nil {
 		t.Error(err)
 	}
@@ -103,7 +103,7 @@ func TestVersion(t *testing.T) {
 }
 
 func TestReplacewalk(t *testing.T) {
-	replacewalk([]string{"dummy1", "dummy2"}, "xxxx", "yyyy")
+	Replacewalk([]string{"dummy1", "dummy2"}, "xxxx", "yyyy")
 }
 
 func TestReplacefile(t *testing.T) {
