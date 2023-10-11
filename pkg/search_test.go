@@ -13,3 +13,11 @@ func TestVersion(t *testing.T) {
 	}
 	assert.Equal(t, "v0.0.1", v)
 }
+
+func TestSearch(t *testing.T) {
+	search([]string{"dummy"}, "xxxx", "yyyy")
+}
+
+func TestReplacefile(t *testing.T) {
+	replacefile("dummy", "xxxx", "yyyy")
+}
