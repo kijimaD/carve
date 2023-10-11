@@ -31,7 +31,7 @@ func getCurrentVersion(repopath string) (string, error) {
 	return version, nil
 }
 
-func search(targetpath []string, old string, new string) error {
+func replacewalk(targetpath []string, old string, new string) error {
 	rootDir := "."
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
