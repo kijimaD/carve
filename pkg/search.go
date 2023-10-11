@@ -36,10 +36,11 @@ func search(targetpath []string, old string, new string) error {
 		if err != nil {
 			return err
 		}
-		// TODO: pathをループする
-		if !info.IsDir() && path == targetpath[0] {
-			if err := replacefile(path, old, new); err != nil {
-				return err
+		for _, tp := range targetpath {
+			if !info.IsDir() && path == tp {
+				if err := replacefile(path, old, new); err != nil {
+					return err
+				}
 			}
 		}
 		return nil

@@ -15,7 +15,7 @@ func TestVersion(t *testing.T) {
 }
 
 func TestSearch(t *testing.T) {
-	search([]string{"dummy"}, "xxxx", "yyyy")
+	search([]string{"dummy1", "dummy2"}, "xxxx", "yyyy")
 }
 
 func TestReplacefile(t *testing.T) {
