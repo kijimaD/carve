@@ -94,17 +94,13 @@ func makeGitRepo(t *testing.T) {
 
 func TestGetNewTag(t *testing.T) {
 	makeGitRepo(t)
+	defer os.RemoveAll("./.git")
 
 	v, err := GetNewTag("./.git")
 	if err != nil {
 		t.Error(err)
 	}
 	assert.Equal(t, "v2.0.0", v)
-
-	err = os.RemoveAll("./.git")
-	if err != nil {
-		t.Error(err)
-	}
 }
 
 func TestReplacewalk(t *testing.T) {
@@ -141,14 +137,31 @@ func TestReplacefile(t *testing.T) {
 
 func TestPutTagFile(t *testing.T) {
 	makeGitRepo(t)
+	defer os.RemoveAll("./.git")
+	defer os.RemoveAll("./.version")
 
 	err := PutTagFile(".")
 	if err != nil {
 		t.Error(err)
 	}
+
+	data, err := ioutil.ReadFile("./.version")
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "v2.0.0", string(data))
 }
 
 func TestGetOldTag(t *testing.T) {
+	makeGitRepo(t)
+	defer os.RemoveAll("./.git")
+	defer os.RemoveAll("./.version")
+
+	err := PutTagFile(".")
+	if err != nil {
+		t.Error(err)
+	}
+
 	oldtag, err := GetOldTag()
 	if err != nil {
 		t.Error(err)
