@@ -20,6 +20,12 @@ func makeGitRepo(t *testing.T) {
 		log.Fatal(err)
 	}
 
+	tempfile, err := ioutil.TempFile(".", "")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(tempfile.Name())
+
 	repoPath := "."
 
 	// 指定したディレクトリに新しいGitリポジトリを初期化
@@ -35,7 +41,7 @@ func makeGitRepo(t *testing.T) {
 	}
 
 	// ステージングエリアにファイルを追加
-	_, err = w.Add("dummy")
+	_, err = w.Add(tempfile.Name())
 	if err != nil {
 		log.Fatal(err)
 	}
