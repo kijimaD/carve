@@ -11,7 +11,15 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-func GetCurrentVersion(repopath string) (string, error) {
+type carve struct {
+	RepoPath string
+	OldTag   string
+	NewTag   string
+}
+
+const Versionfile = ".versions"
+
+func GetNewTag(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
 	if err != nil {
 		log.Fatal(err)
@@ -31,14 +39,20 @@ func GetCurrentVersion(repopath string) (string, error) {
 	return version, nil
 }
 
-func Replacewalk(targetpath []string, old string, new string) error {
-	rootDir := "."
+func Replacewalk(targetpaths []string, old string, new string) error {
+	// MEMO: パスを正規化する。`./`を含まない形に統一しないとマッチしない
+	cleanpaths := make([]string, len(targetpaths))
+	for i, v := range targetpaths {
+		cleanpaths[i] = filepath.Base(v)
+	}
+
+	const rootDir = "."
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		for _, tp := range targetpath {
-			if !info.IsDir() && path == tp {
+		for _, cp := range cleanpaths {
+			if !info.IsDir() && path == cp {
 				if err := replacefile(path, old, new); err != nil {
 					return err
 				}
@@ -66,4 +80,30 @@ func replacefile(filepath string, old string, new string) error {
 		return err
 	}
 	return nil
+}
+
+// .versionsを配置する
+func PutTagFile(basepath string) error {
+	tag, err := GetNewTag(".")
+	if err != nil {
+		return err
+	}
+
+	fp, err := os.Create(filepath.Join(basepath, Versionfile))
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
+
+	fp.WriteString(tag)
+	return nil
+}
+
+// .versionsからタグを取得する
+func GetOldTag() (string, error) {
+	data, err := ioutil.ReadFile(Versionfile)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }

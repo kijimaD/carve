@@ -1,8 +1,10 @@
 package carve
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -11,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// gitリポジトリを作成して確かめる
-func TestVersion(t *testing.T) {
+func makeGitRepo(t *testing.T) {
+	t.Helper()
 	err := os.RemoveAll("./.git")
 	if err != nil {
 		log.Fatal(err)
@@ -87,25 +89,83 @@ func TestVersion(t *testing.T) {
 		Message: "tag message",
 	})
 	if err != nil {
-		log.Fatal(err)
+		t.Error(err)
 	}
+}
 
-	v, err := GetCurrentVersion("./.git")
+func TestGetNewTag(t *testing.T) {
+	makeGitRepo(t)
+	defer os.RemoveAll("./.git")
+
+	v, err := GetNewTag("./.git")
 	if err != nil {
 		t.Error(err)
 	}
 	assert.Equal(t, "v2.0.0", v)
-
-	err = os.RemoveAll("./.git")
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func TestReplacewalk(t *testing.T) {
-	Replacewalk([]string{"dummy1", "dummy2"}, "xxxx", "yyyy")
+	tempfile, err := ioutil.TempFile(".", "")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(tempfile.Name())
+	ioutil.WriteFile(tempfile.Name(), []byte("xxxx yyyy zzzz"), os.ModePerm)
+	Replacewalk([]string{tempfile.Name()}, "x", "y")
+
+	b, err := ioutil.ReadAll(tempfile)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "yyyy yyyy zzzz", string(b))
 }
 
 func TestReplacefile(t *testing.T) {
-	replacefile("dummy", "xxxx", "yyyy")
+	tempfile, err := ioutil.TempFile(".", "")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(tempfile.Name())
+	ioutil.WriteFile(tempfile.Name(), []byte("xxxx yyyy zzzz"), os.ModePerm)
+	replacefile(tempfile.Name(), "x", "y")
+
+	b, err := ioutil.ReadAll(tempfile)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "yyyy yyyy zzzz", string(b))
+}
+
+func TestPutTagFile(t *testing.T) {
+	makeGitRepo(t)
+	defer os.RemoveAll("./.git")
+	defer os.RemoveAll(filepath.Join("./", Versionfile))
+
+	err := PutTagFile(".")
+	if err != nil {
+		t.Error(err)
+	}
+
+	data, err := ioutil.ReadFile(filepath.Join("./", Versionfile))
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "v2.0.0", string(data))
+}
+
+func TestGetOldTag(t *testing.T) {
+	makeGitRepo(t)
+	defer os.RemoveAll("./.git")
+	defer os.RemoveAll(filepath.Join("./", Versionfile))
+
+	err := PutTagFile(".")
+	if err != nil {
+		t.Error(err)
+	}
+
+	oldtag, err := GetOldTag()
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "v2.0.0", oldtag)
 }
