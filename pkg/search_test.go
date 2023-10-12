@@ -1,6 +1,7 @@
 package carve
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -87,7 +88,7 @@ func makeGitRepo(t *testing.T) {
 		Message: "tag message",
 	})
 	if err != nil {
-		log.Fatal(err)
+		t.Error(err)
 	}
 }
 
@@ -102,16 +103,40 @@ func TestGetNewTag(t *testing.T) {
 
 	err = os.RemoveAll("./.git")
 	if err != nil {
-		log.Fatal(err)
+		t.Error(err)
 	}
 }
 
 func TestReplacewalk(t *testing.T) {
-	Replacewalk([]string{"dummy1", "dummy2"}, "xxxx", "yyyy")
+	tempfile, err := ioutil.TempFile(".", "")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(tempfile.Name())
+	ioutil.WriteFile(tempfile.Name(), []byte("xxxx yyyy zzzz"), os.ModePerm)
+	Replacewalk([]string{tempfile.Name()}, "x", "y")
+
+	b, err := ioutil.ReadAll(tempfile)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "yyyy yyyy zzzz", string(b))
 }
 
 func TestReplacefile(t *testing.T) {
-	replacefile("dummy", "xxxx", "yyyy")
+	tempfile, err := ioutil.TempFile(".", "")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove(tempfile.Name())
+	ioutil.WriteFile(tempfile.Name(), []byte("xxxx yyyy zzzz"), os.ModePerm)
+	replacefile(tempfile.Name(), "x", "y")
+
+	b, err := ioutil.ReadAll(tempfile)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "yyyy yyyy zzzz", string(b))
 }
 
 func TestPlaceTag(t *testing.T) {

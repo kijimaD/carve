@@ -39,14 +39,20 @@ func GetNewTag(repopath string) (string, error) {
 	return version, nil
 }
 
-func Replacewalk(targetpath []string, old string, new string) error {
-	rootDir := "."
+func Replacewalk(targetpaths []string, old string, new string) error {
+	// MEMO: パスを正規化する。`./`を含まない形に統一しないとマッチしない
+	cleanpaths := make([]string, len(targetpaths))
+	for i, v := range targetpaths {
+		cleanpaths[i] = filepath.Base(v)
+	}
+
+	const rootDir = "."
 	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		for _, tp := range targetpath {
-			if !info.IsDir() && path == tp {
+		for _, cp := range cleanpaths {
+			if !info.IsDir() && path == cp {
 				if err := replacefile(path, old, new); err != nil {
 					return err
 				}
