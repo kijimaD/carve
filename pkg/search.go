@@ -11,6 +11,14 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
+type carve struct {
+	RepoPath string
+	OldTag   string
+	NewTag   string
+}
+
+const versionfile = ".version"
+
 func GetNewTag(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
 	if err != nil {
@@ -66,4 +74,30 @@ func replacefile(filepath string, old string, new string) error {
 		return err
 	}
 	return nil
+}
+
+// .versionを配置する
+func PlaceTag() error {
+	tag, err := GetNewTag(".")
+	if err != nil {
+		return err
+	}
+
+	fp, err := os.Create(versionfile)
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
+
+	fp.WriteString(tag)
+	return nil
+}
+
+// .versionからタグを取得する
+func GetOldTag() (string, error) {
+	data, err := ioutil.ReadFile(versionfile)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }

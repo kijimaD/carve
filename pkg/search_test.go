@@ -109,3 +109,18 @@ func TestReplacewalk(t *testing.T) {
 func TestReplacefile(t *testing.T) {
 	replacefile("dummy", "xxxx", "yyyy")
 }
+
+func TestPlaceTag(t *testing.T) {
+	err := PlaceTag()
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetOldTag(t *testing.T) {
+	oldtag, err := GetOldTag()
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, "v2.0.0", oldtag)
+}
