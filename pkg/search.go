@@ -17,7 +17,7 @@ type carve struct {
 	NewTag   string
 }
 
-const versionfile = ".version"
+const Versionfile = ".versions"
 
 func GetNewTag(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
@@ -82,14 +82,14 @@ func replacefile(filepath string, old string, new string) error {
 	return nil
 }
 
-// .versionを配置する
+// .versionsを配置する
 func PutTagFile(basepath string) error {
 	tag, err := GetNewTag(".")
 	if err != nil {
 		return err
 	}
 
-	fp, err := os.Create(filepath.Join(basepath, versionfile))
+	fp, err := os.Create(filepath.Join(basepath, Versionfile))
 	if err != nil {
 		return err
 	}
@@ -99,9 +99,9 @@ func PutTagFile(basepath string) error {
 	return nil
 }
 
-// .versionからタグを取得する
+// .versionsからタグを取得する
 func GetOldTag() (string, error) {
-	data, err := ioutil.ReadFile(versionfile)
+	data, err := ioutil.ReadFile(Versionfile)
 	if err != nil {
 		return "", err
 	}

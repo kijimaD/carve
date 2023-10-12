@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -138,14 +139,14 @@ func TestReplacefile(t *testing.T) {
 func TestPutTagFile(t *testing.T) {
 	makeGitRepo(t)
 	defer os.RemoveAll("./.git")
-	defer os.RemoveAll("./.version")
+	defer os.RemoveAll(filepath.Join("./", Versionfile))
 
 	err := PutTagFile(".")
 	if err != nil {
 		t.Error(err)
 	}
 
-	data, err := ioutil.ReadFile("./.version")
+	data, err := ioutil.ReadFile(filepath.Join("./", Versionfile))
 	if err != nil {
 		t.Error(err)
 	}
@@ -155,7 +156,7 @@ func TestPutTagFile(t *testing.T) {
 func TestGetOldTag(t *testing.T) {
 	makeGitRepo(t)
 	defer os.RemoveAll("./.git")
-	defer os.RemoveAll("./.version")
+	defer os.RemoveAll(filepath.Join("./", Versionfile))
 
 	err := PutTagFile(".")
 	if err != nil {

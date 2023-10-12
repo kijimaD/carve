@@ -31,21 +31,28 @@ func (cli *CLI) Execute(args []string) error {
 		return NotEnoughArgumentError
 	}
 
-	oldtag, err := carve.GetOldTag()
-	// TODO: ファイルが存在しないときは、という感じにする
-	if oldtag == "" {
-		carve.PutTagFile(".")
-	}
-
 	gitpath := args[1]
 	files := args[2:]
 	newtag, err := carve.GetNewTag(filepath.Join(gitpath, ".git"))
 	if err != nil {
 		return err
 	}
+	oldtag, err := carve.GetOldTag()
+	// タグファイルがない場合は、最新タグでタグファイルを作成する
+	// TODO: ファイルが存在しないときは、という感じにする
+	if oldtag == "" {
+		fmt.Fprintf(cli.Out, "file `%s` is not found, created...\n", carve.Versionfile)
+		carve.PutTagFile(".")
+		oldtag, err = carve.GetNewTag(filepath.Join(gitpath, ".git"))
+		if err != nil {
+			return err
+		}
+	}
 
 	carve.Replacewalk(files, oldtag, newtag)
-	fmt.Printf("%s -> %s\n",
+	fmt.Fprintf(
+		cli.Out,
+		"%s -> %s\n",
 		oldtag,
 		newtag,
 	)
