@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// gitリポジトリを作成して確かめる
-func TestVersion(t *testing.T) {
+func makeGitRepo(t *testing.T) {
+	t.Helper()
 	err := os.RemoveAll("./.git")
 	if err != nil {
 		log.Fatal(err)
@@ -89,6 +89,10 @@ func TestVersion(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func TestVersion(t *testing.T) {
+	makeGitRepo(t)
 
 	v, err := GetNewTag("./.git")
 	if err != nil {
@@ -111,6 +115,8 @@ func TestReplacefile(t *testing.T) {
 }
 
 func TestPlaceTag(t *testing.T) {
+	makeGitRepo(t)
+
 	err := PlaceTag()
 	if err != nil {
 		t.Error(err)
