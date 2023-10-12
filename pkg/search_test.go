@@ -91,7 +91,7 @@ func makeGitRepo(t *testing.T) {
 	}
 }
 
-func TestVersion(t *testing.T) {
+func TestGetNewTag(t *testing.T) {
 	makeGitRepo(t)
 
 	v, err := GetNewTag("./.git")
