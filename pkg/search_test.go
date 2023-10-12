@@ -139,10 +139,10 @@ func TestReplacefile(t *testing.T) {
 	assert.Equal(t, "yyyy yyyy zzzz", string(b))
 }
 
-func TestPlaceTag(t *testing.T) {
+func TestPutTagFile(t *testing.T) {
 	makeGitRepo(t)
 
-	err := PlaceTag()
+	err := PutTagFile(".")
 	if err != nil {
 		t.Error(err)
 	}

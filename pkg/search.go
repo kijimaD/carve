@@ -83,13 +83,13 @@ func replacefile(filepath string, old string, new string) error {
 }
 
 // .versionを配置する
-func PlaceTag() error {
+func PutTagFile(basepath string) error {
 	tag, err := GetNewTag(".")
 	if err != nil {
 		return err
 	}
 
-	fp, err := os.Create(versionfile)
+	fp, err := os.Create(filepath.Join(basepath, versionfile))
 	if err != nil {
 		return err
 	}
