@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"path/filepath"
 
@@ -14,7 +15,7 @@ type CLI struct {
 }
 
 var (
-	NotEnoughArgumentError = errors.New("Not enough arguments. Expect greater then 3 arguments.")
+	NotEnoughArgumentError = errors.New("Not enough arguments. Expect greater then 2 arguments.")
 )
 
 func New(out io.Writer) *CLI {
@@ -26,19 +27,29 @@ func New(out io.Writer) *CLI {
 func (cli *CLI) Execute(args []string) error {
 	flag.Parse()
 
-	if len(args) <= 3 {
+	if len(args) <= 2 {
 		return NotEnoughArgumentError
 	}
 
+	oldtag, err := carve.GetOldTag()
+	// TODO: ファイルが存在しないときは、という感じにする
+	if oldtag == "" {
+		carve.PutTagFile(".")
+	}
+
 	gitpath := args[1]
-	oldversion := args[2]
-	files := args[3:]
-	newversion, err := carve.GetNewTag(filepath.Join(gitpath, ".git"))
+	files := args[2:]
+	newtag, err := carve.GetNewTag(filepath.Join(gitpath, ".git"))
 	if err != nil {
 		return err
 	}
 
-	carve.Replacewalk(files, oldversion, newversion)
+	carve.Replacewalk(files, oldtag, newtag)
+	fmt.Printf("%s -> %s\n",
+		oldtag,
+		newtag,
+	)
+	carve.PutTagFile(".")
 
 	return nil
 }
