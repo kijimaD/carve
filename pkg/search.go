@@ -11,7 +11,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-func GetCurrentVersion(repopath string) (string, error) {
+func GetNewTag(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
 	if err != nil {
 		log.Fatal(err)

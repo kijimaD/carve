@@ -33,7 +33,7 @@ func (cli *CLI) Execute(args []string) error {
 	gitpath := args[1]
 	oldversion := args[2]
 	files := args[3:]
-	newversion, err := carve.GetCurrentVersion(filepath.Join(gitpath, ".git"))
+	newversion, err := carve.GetNewTag(filepath.Join(gitpath, ".git"))
 	if err != nil {
 		return err
 	}

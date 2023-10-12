@@ -90,7 +90,7 @@ func TestVersion(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	v, err := GetCurrentVersion("./.git")
+	v, err := GetNewTag("./.git")
 	if err != nil {
 		t.Error(err)
 	}
