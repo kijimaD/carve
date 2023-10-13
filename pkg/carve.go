@@ -43,7 +43,7 @@ func Replacewalk(targetpaths []string, old string, new string) error {
 	// MEMO: パスを正規化する。`./`を含まない形に統一しないとマッチしない
 	cleanpaths := make([]string, len(targetpaths))
 	for i, v := range targetpaths {
-		cleanpaths[i] = filepath.Base(v)
+		cleanpaths[i] = canonicalPath(v)
 	}
 
 	const rootDir = "."
