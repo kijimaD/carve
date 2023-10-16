@@ -2,41 +2,83 @@ package carve
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type carve struct {
-	RepoPath string
+	RepoPath string // TODO: 取り回しやすいようにpathではなくRepoを渡す
 	OldTag   string
 	NewTag   string
 }
 
 const Versionfile = ".versions"
 
-func GetNewTag(repopath string) (string, error) {
+func GetLatestTag(repopath string) (string, error) {
 	r, err := git.PlainOpen(repopath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tagIter, err := r.Tags()
 	if err != nil {
 		return "", err
 	}
+	tags, err := getTags(r)
+	if err != nil {
+		return "", err
+	}
+	err = sortTagsByDate(tags, r)
+	if err != nil {
+		return "", err
+	}
+	// 日付でソートして最新のタグを返す
+	return tags[0].Name().Short(), nil
+}
 
-	var version string
-	// MEMO: 古い順にイテレートされ、ループの最後で最新のバージョンが入る
-	tagIter.ForEach(func(ref *plumbing.Reference) error {
-		version = ref.Name().Short()
+func getTags(repo *git.Repository) ([]*plumbing.Reference, error) {
+	tags, err := repo.Tags()
+	if err != nil {
+		return nil, err
+	}
+	var tagList []*plumbing.Reference
+	err = tags.ForEach(func(tag *plumbing.Reference) error {
+		tagList = append(tagList, tag)
 		return nil
 	})
-	return version, nil
+	return tagList, err
+}
+
+func getCommitTime(tag *plumbing.Reference, repo *git.Repository) (time.Time, error) {
+	tagRef, err := repo.Reference(tag.Name(), true)
+	if err != nil {
+		return time.Time{}, err
+	}
+	// タグのリファレンスからコミットオブジェクトを取得
+	// 対象は軽量タグなのでCommitObjectから取得する
+	commitObj, err := repo.CommitObject(tagRef.Hash())
+	if err != nil {
+		return time.Time{}, err
+	}
+
+	return commitObj.Committer.When, nil
+}
+
+func sortTagsByDate(tags []*plumbing.Reference, repo *git.Repository) error {
+	var e error
+	sort.Slice(tags, func(i, j int) bool {
+		timeI, err := getCommitTime(tags[i], repo)
+		if err != nil {
+			e = err
+		}
+		timeJ, err := getCommitTime(tags[j], repo)
+		if err != nil {
+			e = err
+		}
+		return timeI.After(timeJ)
+	})
+	return e
 }
 
 func Replacewalk(targetpaths []string, old string, new string) error {
@@ -84,7 +126,7 @@ func replacefile(filepath string, old string, new string) error {
 
 // .versionsを配置する
 func PutTagFile(basepath string) error {
-	tag, err := GetNewTag(".")
+	tag, err := GetLatestTag(".")
 	if err != nil {
 		return err
 	}
