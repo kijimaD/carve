@@ -77,7 +77,7 @@ func makeGitRepo(t *testing.T) {
 		Author: &object.Signature{
 			Name:  "Your Name",
 			Email: "your.email@example.com",
-			When:  time.Now(),
+			When:  time.Now().AddDate(0, 0, 1),
 		},
 	})
 	if err != nil {
@@ -90,7 +90,7 @@ func makeGitRepo(t *testing.T) {
 		Tagger: &object.Signature{
 			Name:  "Your Name",
 			Email: "your.email@example.com",
-			When:  time.Now(),
+			When:  time.Now().AddDate(0, 0, 1),
 		},
 		Message: "tag message",
 	})
@@ -99,11 +99,11 @@ func makeGitRepo(t *testing.T) {
 	}
 }
 
-func TestGetNewTag(t *testing.T) {
+func TestGetLatestTag(t *testing.T) {
 	makeGitRepo(t)
 	defer os.RemoveAll("./.git")
 
-	v, err := GetNewTag("./.git")
+	v, err := GetLatestTag("./.git")
 	if err != nil {
 		t.Error(err)
 	}

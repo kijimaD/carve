@@ -33,7 +33,7 @@ func (cli *CLI) Execute(args []string) error {
 
 	gitpath := args[1]
 	files := args[2:]
-	newtag, err := carve.GetNewTag(filepath.Join(gitpath, ".git"))
+	newtag, err := carve.GetLatestTag(filepath.Join(gitpath, ".git"))
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (cli *CLI) Execute(args []string) error {
 	if oldtag == "" {
 		fmt.Fprintf(cli.Out, "file `%s` is not found, created...\n", carve.Versionfile)
 		carve.PutTagFile(".")
-		oldtag, err = carve.GetNewTag(filepath.Join(gitpath, ".git"))
+		oldtag, err = carve.GetLatestTag(filepath.Join(gitpath, ".git"))
 		if err != nil {
 			return err
 		}
