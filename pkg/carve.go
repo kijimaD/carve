@@ -29,7 +29,10 @@ func GetLatestTag(repopath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	sortTagsByDate(tags, r)
+	err = sortTagsByDate(tags, r)
+	if err != nil {
+		return "", err
+	}
 	// 日付でソートして最新のタグを返す
 	return tags[0].Name().Short(), nil
 }
@@ -48,13 +51,18 @@ func getTags(repo *git.Repository) ([]*plumbing.Reference, error) {
 }
 
 func getCommitTime(tag *plumbing.Reference, repo *git.Repository) (time.Time, error) {
-	hash := tag.Hash()
-	tagObj, err := repo.TagObject(hash)
+	tagRef, err := repo.Reference(tag.Name(), true)
+	if err != nil {
+		return time.Time{}, err
+	}
+	// タグのリファレンスからコミットオブジェクトを取得
+	// 対象は軽量タグなのでCommitObjectから取得する
+	commitObj, err := repo.CommitObject(tagRef.Hash())
 	if err != nil {
 		return time.Time{}, err
 	}
 
-	return tagObj.Tagger.When, nil
+	return commitObj.Committer.When, nil
 }
 
 func sortTagsByDate(tags []*plumbing.Reference, repo *git.Repository) error {

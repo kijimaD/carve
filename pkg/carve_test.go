@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,7 +35,7 @@ func makeGitRepo(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	// ワーキングツリーからステージングエリアにファイルを追加（必要な場合）
+	// ワーキングツリーからステージングエリアにファイルを追加
 	w, err := r.Worktree()
 	if err != nil {
 		log.Fatal(err)
@@ -60,16 +61,10 @@ func makeGitRepo(t *testing.T) {
 
 	// 最新コミット
 	h, err := r.Head()
-	// タグを追加
-	_, err = r.CreateTag("v1.0.0", h.Hash(), &git.CreateTagOptions{
-		Tagger: &object.Signature{
-			Name:  "Your Name",
-			Email: "your.email@example.com",
-			When:  time.Now(),
-		},
-		Message: "tag message",
-	})
-	if err != nil {
+	// 軽量タグを追加
+	tagName := "v1.0.0"
+	tagRef := plumbing.ReferenceName("refs/tags/" + tagName)
+	if err := r.Storer.SetReference(plumbing.NewHashReference(tagRef, h.Hash())); err != nil {
 		log.Fatal(err)
 	}
 
@@ -84,18 +79,13 @@ func makeGitRepo(t *testing.T) {
 		log.Fatal(err)
 	}
 
+	// 最新コミット
 	h, err = r.Head()
-	// タグを追加
-	_, err = r.CreateTag("v2.0.0", h.Hash(), &git.CreateTagOptions{
-		Tagger: &object.Signature{
-			Name:  "Your Name",
-			Email: "your.email@example.com",
-			When:  time.Now().AddDate(0, 0, 1),
-		},
-		Message: "tag message",
-	})
-	if err != nil {
-		t.Error(err)
+	// 軽量タグを追加
+	tagName = "v2.0.0"
+	tagRef = plumbing.ReferenceName("refs/tags/" + tagName)
+	if err := r.Storer.SetReference(plumbing.NewHashReference(tagRef, h.Hash())); err != nil {
+		log.Fatal(err)
 	}
 }
 
